@@ -17,6 +17,7 @@ namespace WebApiJwt.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private IdentityUser? user;
 
         public AuthenticateController(
             UserManager<IdentityUser> userManager,
@@ -50,42 +51,19 @@ namespace WebApiJwt.Controllers
 
                 JwtSecurityToken? token = GetToken(authClaims);
 
-                return Ok(new
+                return Ok(new LoginResponse
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    Expiration = token.ValidTo
                 });
             }
             return Unauthorized();
         }
-
-        //[HttpPost]
-        //[Route("register")]
-        //public async Task<IActionResult> Register([FromBody] RegisterModel model)
-        //{
-        //    IdentityUser? userExists = await _userManager.FindByNameAsync(model.Username);
-        //    if (userExists != null)
-        //        return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
-
-        //    IdentityUser user = new()
-        //    {
-        //        Email = model.Email,
-        //        SecurityStamp = Guid.NewGuid().ToString(),
-        //        UserName = model.Username
-        //    };
-        //    IdentityResult? result = await _userManager.CreateAsync(user, model.Password);
-        //    if (!result.Succeeded)
-        //        return StatusCode(StatusCodes.Status500InternalServerError,
-        //            new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-
-        //    return Ok(new Response { Status = "Success", Message = "User created successfully!" });
-        //}
-        IdentityUser? user;
         private async Task<IActionResult> Register(RegisterModel model)
         {
             IdentityUser? userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "UserName already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponse { Status = "Error", Message = "UserName already exists!" });
 
             user = new()
             {
@@ -96,7 +74,7 @@ namespace WebApiJwt.Controllers
             IdentityResult? result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response { Status = "Error", Message = "User creation failed!" + result.ToString() });
+                    new RegisterResponse { Status = "Error", Message = "User creation failed!" + result.ToString() });
             return Ok();
         }
 
@@ -104,12 +82,10 @@ namespace WebApiJwt.Controllers
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
-            // Если среди ролей нет UserRoles.Admin, то он добавляется в список ролей.
-            //if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-            //    await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin) && ((List<IdentityUser>)await _userManager.GetUsersInRoleAsync(UserRoles.Admin)).Count > 0)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Admin already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponse { Status = "Error", Message = "Admin already exists!" });
             else
+                // Если среди ролей нет UserRoles.Admin, то он добавляется в список ролей.
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             IActionResult result = await Register(model);
             if (result is not OkResult || user == null)
@@ -121,7 +97,7 @@ namespace WebApiJwt.Controllers
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
             if (await _roleManager.RoleExistsAsync(UserRoles.User))
                 await _userManager.AddToRoleAsync(user, UserRoles.User);
-            return Ok(new Response { Status = "Success", Message = "Admin, User created successfully!" });
+            return Ok(new RegisterResponse { Status = "Success", Message = "Admin, User created successfully!" });
         }
 
         [Authorize(Roles = UserRoles.Admin)]
@@ -138,7 +114,7 @@ namespace WebApiJwt.Controllers
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
             if (await _roleManager.RoleExistsAsync(UserRoles.User))
                 await _userManager.AddToRoleAsync(user, UserRoles.User);
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            return Ok(new RegisterResponse { Status = "Success", Message = "User created successfully!" });
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)

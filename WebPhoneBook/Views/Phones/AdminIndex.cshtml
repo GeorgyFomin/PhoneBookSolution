@@ -5,7 +5,6 @@
 }
 
 <h1>Phones</h1>
-Анонимный пользователь имеет право просмотра деталей каждой записи и регистрации единственного пользователя-администратора.
 <ul>
     <li>
         <a asp-action="RegisterAdmin" asp-controller="Authenticate">Регистрация пользователя-администратора с полными правами манипуляций с записями в книге, включая право регистрации нового пользователя. </a>
@@ -14,9 +13,15 @@
         <a asp-action="LoginAdmin" asp-controller="Authenticate">Логин для пользователя-администратора. </a>
     </li>
     <li>
+        <a asp-action="RegisterUser" asp-controller="Authenticate">Регистрация пользователя с правом создания новой записи в книге. Доступна только администратору. </a>
+    </li>
+    <li>
         <a asp-action="LoginUser" asp-controller="Authenticate">Логин для пользователя с правом создания новой записи в книге. </a>
     </li>
 </ul>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
 <table class="table">
     <thead>
         <tr>
@@ -40,7 +45,9 @@
                     @Html.DisplayFor(modelItem => item.PhoneNumber)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
             </tr>
         }

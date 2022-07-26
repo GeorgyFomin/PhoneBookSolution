@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using RestSharp;
 using UseCases.API.Dto;
 
 namespace WebPhoneBook.Controllers
@@ -9,8 +10,8 @@ namespace WebPhoneBook.Controllers
     public class PhonesController : Controller
     {
         static readonly string apiAddress = "https://localhost:7252/";//Или http://localhost:5252/
-        //static readonly string apiAddress = "https://localhost:7068/";//Или http://localhost:5068/
         private static readonly string path = "api/Phones";
+        readonly RestClient restClient = new(apiAddress);
         // GET: Phones
         public async Task<IActionResult> Index()
         {
@@ -24,6 +25,15 @@ namespace WebPhoneBook.Controllers
             }
             return View(phoneDtos);
         }
+        public async Task<IActionResult> AdminIndex()
+        {
+            return await Index();
+        }
+        public async Task<IActionResult> UserIndex()
+        {
+            return await Index();
+        }
+
         async Task<IActionResult> GetPhoneById(int? id)
         {
             if (id == null)
@@ -58,10 +68,12 @@ namespace WebPhoneBook.Controllers
             {
                 return View(phoneDto);
             }
-            HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, phoneDto);
-            //response.EnsureSuccessStatusCode();
-            return response.IsSuccessStatusCode ? RedirectToAction(nameof(Index)) : RedirectToAction("LoginUser", "Authenticate");
+            RestRequest? restRequest = new(path, Method.Post);
+            if (AuthenticateController.JwtToken != null)
+                restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
+            restRequest.AddJsonBody(phoneDto);
+            RestResponse? restResponse = await restClient.ExecutePostAsync(restRequest);
+            return restResponse.IsSuccessful ? RedirectToAction(nameof(UserIndex)) : Content(restResponse.StatusCode.ToString());
         }
         // GET: Phones/Edit/id
         public async Task<IActionResult> Edit(int? id) => await GetPhoneById(id);
@@ -79,9 +91,15 @@ namespace WebPhoneBook.Controllers
             }
             try
             {
-                HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
-                HttpResponseMessage response = await client.PutAsJsonAsync(path + $"/{phoneDto.Id}", phoneDto);
-                response.EnsureSuccessStatusCode();
+                RestRequest? restRequest = new(path + $"/{phoneDto.Id}", Method.Put);
+                if (AuthenticateController.JwtToken != null)
+                    restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
+                restRequest.AddJsonBody(phoneDto);
+                RestResponse? restResponse = await restClient.ExecutePutAsync(restRequest);
+                if (!restResponse.IsSuccessful)
+                {
+                    return Content(restResponse.StatusCode.ToString());
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -94,7 +112,7 @@ namespace WebPhoneBook.Controllers
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(AdminIndex));
         }
 
         // GET: Phones/Delete/id
@@ -105,10 +123,11 @@ namespace WebPhoneBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
-            HttpResponseMessage response = await client.DeleteAsync(path + $"/{id}");
-            response.EnsureSuccessStatusCode();
-            return RedirectToAction(nameof(Index));
+            RestRequest? restRequest = new(path + $"/{id}", Method.Delete);
+            if (AuthenticateController.JwtToken != null)
+                restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
+            RestResponse? restResponse = await restClient.ExecuteAsync(restRequest);
+            return restResponse.IsSuccessful ? RedirectToAction(nameof(AdminIndex)) : Content(restResponse.StatusCode.ToString());
         }
     }
 }

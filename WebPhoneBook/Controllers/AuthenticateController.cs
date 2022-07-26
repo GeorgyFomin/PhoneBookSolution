@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using RestSharp;
 using UseCases.API.Authentication;
 
 
@@ -9,6 +11,7 @@ namespace WebPhoneBook.Controllers
     {
         static readonly string apiAddress = "https://localhost:7252/";//Или http://localhost:5252/
         private static readonly string path = "api/Authenticate";
+        public static string? JwtToken { get; set; }
 
         [HttpGet]
         public IActionResult RegisterUser()
@@ -23,12 +26,14 @@ namespace WebPhoneBook.Controllers
             {
                 return View();
             }
-            HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
-            HttpResponseMessage response = await client.PostAsJsonAsync(path + "/register-user", model);
-            //response.EnsureSuccessStatusCode();
-            return response.IsSuccessStatusCode ? RedirectToAction("LoginUser", "Authenticate") :
-                Content($"Error! User creation failed! Status Code:{response.StatusCode}");
-            //Content(response.StatusCode.ToString()); //RedirectToAction("LoginAdmin", "Authenticate");
+
+            RestClient restClient = new(apiAddress);
+            RestRequest? restRequest = new(path + "/register-user", Method.Post);
+            if (JwtToken != null)
+                restRequest.AddHeader("Authorization", $"Bearer {JwtToken}");
+            restRequest.AddJsonBody(model);
+            RestResponse? restResponse = await restClient.ExecutePostAsync(restRequest);
+            return restResponse.IsSuccessful ? RedirectToAction("LoginUser", "Authenticate") : Content(restResponse.StatusCode.ToString());
         }
 
         [HttpGet]
@@ -47,7 +52,6 @@ namespace WebPhoneBook.Controllers
             }
             HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
             HttpResponseMessage response = await client.PostAsJsonAsync(path + "/register-admin", model);
-            //response.EnsureSuccessStatusCode();
             return response.IsSuccessStatusCode ? RedirectToAction("LoginAdmin", "Authenticate") :
                 Content($"Error! Admin creation failed! {response.StatusCode}");
         }
@@ -67,9 +71,12 @@ namespace WebPhoneBook.Controllers
             }
             HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
             HttpResponseMessage response = await client.PostAsJsonAsync(path + "/Login", model);
-            //response.EnsureSuccessStatusCode();
-            return response.IsSuccessStatusCode ? RedirectToAction("Index", "Phones") :
-                Content($"Error! User login failed! Status Code:{response.StatusCode}");
+            if (response.IsSuccessStatusCode)
+            {
+                JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
+                return RedirectToAction("UserIndex", "Phones");
+            }
+            return Content($"Error! User login failed! Status Code:{response.StatusCode}");
         }
         [HttpGet]
         public IActionResult LoginAdmin()
@@ -86,8 +93,12 @@ namespace WebPhoneBook.Controllers
             }
             HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
             HttpResponseMessage response = await client.PostAsJsonAsync(path + "/Login", model);
-            //response.EnsureSuccessStatusCode();
-            return response.IsSuccessStatusCode ? RedirectToAction("Index", "Phones") : Content($"Error! Admin login failed! Status Code:{response.StatusCode}");
+            if (response.IsSuccessStatusCode)
+            {
+                JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
+                return RedirectToAction("AdminIndex", "Phones");
+            }
+            return Content($"Error! Admin login failed! Status Code:{response.StatusCode}");
 
         }
     }

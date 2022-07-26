@@ -6,7 +6,6 @@ using UseCases.API.Phones.Commands;
 using UseCases.API.Phones.Queries;
 using Microsoft.AspNetCore.Authorization;
 using UseCases.API.Authentication;
-//using WebApiJwt.Auth;
 
 namespace WebApiJwt.Controllers
 {
