@@ -1,8 +1,4 @@
-﻿@*@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Authorization.Infrastructure
-@inject IAuthorizationService AuthorizationService
-*@
-@model UseCases.API.Dto.PhoneDto
+﻿@model UseCases.API.Dto.PhoneDto
 
 @{
     ViewData["Title"] = "Details";
@@ -29,11 +25,6 @@
     </dl>
 </div>
 <div>
-@*    @if ((await AuthorizationService.AuthorizeAsync(User, Model, new OperationAuthorizationRequirement { Name = "Edit" })).Succeeded)
-    {
-        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
-        <text>|</text>
-    }
-*@    
-<a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>|
+    <a asp-action="Index">Back to List</a>
 </div>

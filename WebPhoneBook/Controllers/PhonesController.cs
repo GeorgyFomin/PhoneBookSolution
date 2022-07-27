@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RestSharp;
@@ -52,6 +51,7 @@ namespace WebPhoneBook.Controllers
         }
         // GET: Phones/Details/id
         public async Task<IActionResult> Details(int? id) => await GetPhoneById(id);
+        public async Task<IActionResult> AdminDetails(int? id) => await GetPhoneById(id);
         // GET: Phones/Create
         public IActionResult Create()
         {

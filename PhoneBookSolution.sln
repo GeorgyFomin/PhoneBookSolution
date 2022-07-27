@@ -33,8 +33,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiJwt", "WebApiJwt\WebA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebPhoneBook", "WebPhoneBook\WebPhoneBook.csproj", "{704C8107-0A2D-42A2-8727-5E83ECA08726}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebJwtPhoneBook", "WebJwtPhoneBook\WebJwtPhoneBook.csproj", "{58C6FF73-D50E-4381-A3A6-9C17CE65CFA8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,10 +79,6 @@ Global
 		{704C8107-0A2D-42A2-8727-5E83ECA08726}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{704C8107-0A2D-42A2-8727-5E83ECA08726}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{704C8107-0A2D-42A2-8727-5E83ECA08726}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58C6FF73-D50E-4381-A3A6-9C17CE65CFA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58C6FF73-D50E-4381-A3A6-9C17CE65CFA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58C6FF73-D50E-4381-A3A6-9C17CE65CFA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58C6FF73-D50E-4381-A3A6-9C17CE65CFA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,7 +94,6 @@ Global
 		{0022CEC2-C9D8-4284-9539-A70D2983DE06} = {018F5A33-16E6-48CE-BE37-7856F0623990}
 		{E4816F7A-B1F0-4865-97EE-4FB809E5AFD9} = {B4048939-0E6A-4D53-991B-7E7AC6E481B3}
 		{704C8107-0A2D-42A2-8727-5E83ECA08726} = {018F5A33-16E6-48CE-BE37-7856F0623990}
-		{58C6FF73-D50E-4381-A3A6-9C17CE65CFA8} = {018F5A33-16E6-48CE-BE37-7856F0623990}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC2B2A1B-6477-4ACC-8FC2-2DF9C6B50F78}
