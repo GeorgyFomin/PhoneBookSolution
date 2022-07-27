@@ -63,7 +63,7 @@ namespace WebApiJwt.Controllers
         {
             IdentityUser? userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponse { Status = "Error", Message = "UserName already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponse { Status = "Error", Message = $"Имя {model.Username} already exists!" });
 
             user = new()
             {
@@ -83,7 +83,7 @@ namespace WebApiJwt.Controllers
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin) && ((List<IdentityUser>)await _userManager.GetUsersInRoleAsync(UserRoles.Admin)).Count > 0)
-                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponse { Status = "Error", Message = "Admin already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponse { Status = "Error", Message = "One Admin already exists!" });
             else
                 // Если среди ролей нет UserRoles.Admin, то он добавляется в список ролей.
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));

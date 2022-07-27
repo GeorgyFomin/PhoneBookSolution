@@ -7,16 +7,10 @@
 <h1>Phones</h1>
 <ul>
     <li>
-        <a asp-action="RegisterAdmin" asp-controller="Authenticate">Регистрация пользователя-администратора с полными правами манипуляций с записями в книге, включая право регистрации нового пользователя. </a>
+        <a asp-action="RegisterUser" asp-controller="Authenticate">Регистрация пользователя с правом создания новой записи</a><br/>
     </li>
     <li>
-        <a asp-action="LoginAdmin" asp-controller="Authenticate">Логин для пользователя-администратора. </a>
-    </li>
-    <li>
-        <a asp-action="RegisterUser" asp-controller="Authenticate">Регистрация пользователя с правом создания новой записи в книге. Доступна только администратору. </a>
-    </li>
-    <li>
-        <a asp-action="LoginUser" asp-controller="Authenticate">Логин для пользователя с правом создания новой записи в книге. </a>
+        <a asp-action="LoginUser" asp-controller="Authenticate">Вход для пользователя с правом создания новой записи</a>
     </li>
 </ul>
 <p>

@@ -33,7 +33,21 @@ namespace WebPhoneBook.Controllers
                 restRequest.AddHeader("Authorization", $"Bearer {JwtToken}");
             restRequest.AddJsonBody(model);
             RestResponse? restResponse = await restClient.ExecutePostAsync(restRequest);
-            return restResponse.IsSuccessful ? RedirectToAction("LoginUser", "Authenticate") : Content(restResponse.StatusCode.ToString());
+            if (restResponse.IsSuccessful)
+                return RedirectToAction("LoginUser", "Authenticate");
+            else
+            {
+                string? content = restResponse.Content;
+                if (content != null)
+                {
+                    RegisterResponse? registerResponse = JsonConvert.DeserializeObject<RegisterResponse>(content);
+                    if (registerResponse != null && registerResponse.Message != null)
+                    {
+                        return Content(registerResponse.Message);
+                    }
+                }
+                return Content(restResponse.StatusCode.ToString());
+            }
         }
 
         [HttpGet]
@@ -52,8 +66,17 @@ namespace WebPhoneBook.Controllers
             }
             HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
             HttpResponseMessage response = await client.PostAsJsonAsync(path + "/register-admin", model);
-            return response.IsSuccessStatusCode ? RedirectToAction("LoginAdmin", "Authenticate") :
-                Content($"Error! Admin creation failed! {response.StatusCode}");
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("LoginAdmin", "Authenticate");
+            }
+            else
+            {
+                RegisterResponse? registerResponse = JsonConvert.DeserializeObject<RegisterResponse>(await response.Content.ReadAsStringAsync());
+                return
+                    Content(registerResponse != null && registerResponse.Message != null ? registerResponse.Message :
+                    $"Error! Admin creation failed! {await response.Content.ReadAsStringAsync()}");
+            }
         }
 
         [HttpGet]
