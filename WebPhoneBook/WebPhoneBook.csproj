@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UseCases.API\UseCases.API.csproj" />
+    <ProjectReference Include="..\WebApiJwt\WebApiJwt.csproj" />
   </ItemGroup>
 
 </Project>

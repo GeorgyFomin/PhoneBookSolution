@@ -23,6 +23,7 @@ namespace WebApiJwt.Data
         /// </summary>
         public static readonly Random random = new();
         private static readonly PhoneNumberUtil phoneUtil = PhoneNumberUtil.GetInstance();
+
         private static PhoneNumber? GetRandomPhoneNumber() =>
             phoneUtil.Parse("+7" + new string(Enumerable.Range(2, random.Next(2, 11)).Select(x => (char)random.Next('0', '9' + 1)).ToArray()), "ru");
         private static Phone GetRandomPhone() => new() { Name = GetRandomString(5), PhoneNumder = GetRandomPhoneNumber() };

@@ -1,7 +1,4 @@
-﻿@*@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Authorization.Infrastructure
-@inject IAuthorizationService AuthorizationService
-*@
+﻿@using UseCases.API.Authentication
 @model UseCases.API.Dto.PhoneDto
 
 @{
@@ -29,11 +26,11 @@
     </dl>
 </div>
 <div>
-@*    @if ((await AuthorizationService.AuthorizeAsync(User, Model, new OperationAuthorizationRequirement { Name = "Edit" })).Succeeded)
+    @if (ViewBag.Message == UserRoles.Admin)
     {
         <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
         <text>|</text>
     }
-*@    
-<a asp-action="Index">Back to List</a>
+
+    <a asp-action="Index">Back to List</a>
 </div>

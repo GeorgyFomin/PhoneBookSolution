@@ -1,22 +1,48 @@
-﻿@model IEnumerable<UseCases.API.Dto.PhoneDto>
+﻿@using UseCases.API.Authentication
+
+@model IEnumerable<UseCases.API.Dto.PhoneDto>
 
 @{
     ViewData["Title"] = "Phone Book";
 }
-
+@ViewBag.Message
 <h1>Phones</h1>
-Анонимный пользователь имеет право просмотра деталей каждой записи и регистрации <b>единственного</b> пользователя-администратора.<br/>
+
+@if (ViewBag?.Message == null)
+{
+    <text>
+        Анонимный пользователь имеет право просмотра деталей каждой записи и регистрации <b>единственного</b> пользователя-администратора.<br />
+    </text>
+}
 <ul>
-    <li>
-        <a asp-action="RegisterAdmin" asp-controller="Authenticate">Регистрация пользователя-администратора</a> <br />
-    </li>
-    <li>
-        <a asp-action="LoginAdmin" asp-controller="Authenticate">Вход для администратора </a>
-    </li>
+    @if (ViewBag?.Message == null)
+    {
+        <li>
+            <a asp-action="RegisterAdmin" asp-controller="Authenticate">Регистрация пользователя-администратора</a> <br />
+        </li>
+    }
+    @if (ViewBag?.Message == UserRoles.Admin)
+    {
+        <li>
+            <a asp-action="RegisterUser" asp-controller="Authenticate">Регистрация пользователя с правом создания новой записи</a><br />
+        </li>
+    }
+    @if (ViewBag?.Message != UserRoles.Admin)
+    {
+        <li>
+            <a asp-action="LoginAdmin" asp-controller="Authenticate">Вход для администратора </a>
+        </li>
+    }
     <li>
         <a asp-action="LoginUser" asp-controller="Authenticate">Вход для пользователя с правом создания новой записи</a>
     </li>
 </ul>
+@if (ViewBag?.Message == UserRoles.Admin || ViewBag?.Message == UserRoles.User)
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
@@ -41,6 +67,13 @@
                 </td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @if (ViewBag?.Message == UserRoles.Admin)
+                    {
+                        <text>|</text>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <text>|</text>
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
                 </td>
             </tr>
         }

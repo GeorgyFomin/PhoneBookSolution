@@ -10,8 +10,9 @@ namespace WebPhoneBook.Controllers
     public class AuthenticateController : Controller
     {
         static readonly string apiAddress = "https://localhost:7252/";//Или http://localhost:5252/
-        private static readonly string path = "api/Authenticate";
+        private static readonly string path = "api/Auth";
         public static string? JwtToken { get; set; }
+        public static string? Role { get; set; }
 
         [HttpGet]
         public IActionResult RegisterUser()
@@ -97,7 +98,8 @@ namespace WebPhoneBook.Controllers
             if (response.IsSuccessStatusCode)
             {
                 JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
-                return RedirectToAction("UserIndex", "Phones");
+                Role = UserRoles.User;
+                return RedirectToAction("Index", "Phones");
             }
             return Content($"Error! User login failed! Status Code:{response.StatusCode}");
         }
@@ -119,7 +121,8 @@ namespace WebPhoneBook.Controllers
             if (response.IsSuccessStatusCode)
             {
                 JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
-                return RedirectToAction("AdminIndex", "Phones");
+                Role = UserRoles.Admin;
+                return RedirectToAction("Index", "Phones");
             }
             return Content($"Error! Admin login failed! Status Code:{response.StatusCode}");
 

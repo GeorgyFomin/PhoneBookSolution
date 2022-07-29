@@ -10,6 +10,7 @@ namespace WebPhoneBook.Controllers
     {
         static readonly string apiAddress = "https://localhost:7252/";//Или http://localhost:5252/
         private static readonly string path = "api/Phones";
+
         readonly RestClient restClient = new(apiAddress);
         // GET: Phones
         public async Task<IActionResult> Index()
@@ -21,18 +22,10 @@ namespace WebPhoneBook.Controllers
             {
                 var result = response.Content.ReadAsStringAsync().Result;
                 phoneDtos = JsonConvert.DeserializeObject<List<PhoneDto>>(result);
+                ViewBag.Message = AuthenticateController.Role;
             }
             return View(phoneDtos);
         }
-        public async Task<IActionResult> AdminIndex()
-        {
-            return await Index();
-        }
-        public async Task<IActionResult> UserIndex()
-        {
-            return await Index();
-        }
-
         async Task<IActionResult> GetPhoneById(int? id)
         {
             if (id == null)
@@ -50,8 +43,12 @@ namespace WebPhoneBook.Controllers
             return phoneDto == null ? NotFound() : View(phoneDto);
         }
         // GET: Phones/Details/id
-        public async Task<IActionResult> Details(int? id) => await GetPhoneById(id);
-        public async Task<IActionResult> AdminDetails(int? id) => await GetPhoneById(id);
+        public async Task<IActionResult> Details(int? id)
+        {
+            ViewBag.Message = AuthenticateController.Role;
+            return await GetPhoneById(id);
+        }
+
         // GET: Phones/Create
         public IActionResult Create()
         {
@@ -73,7 +70,7 @@ namespace WebPhoneBook.Controllers
                 restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
             restRequest.AddJsonBody(phoneDto);
             RestResponse? restResponse = await restClient.ExecutePostAsync(restRequest);
-            return restResponse.IsSuccessful ? RedirectToAction(nameof(UserIndex)) : Content(restResponse.StatusCode.ToString());
+            return restResponse.IsSuccessful ? RedirectToAction(nameof(Index)) : Content(restResponse.StatusCode.ToString());
         }
         // GET: Phones/Edit/id
         public async Task<IActionResult> Edit(int? id) => await GetPhoneById(id);
@@ -112,7 +109,7 @@ namespace WebPhoneBook.Controllers
                     throw;
                 }
             }
-            return RedirectToAction(nameof(AdminIndex));
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Phones/Delete/id
@@ -127,7 +124,7 @@ namespace WebPhoneBook.Controllers
             if (AuthenticateController.JwtToken != null)
                 restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
             RestResponse? restResponse = await restClient.ExecuteAsync(restRequest);
-            return restResponse.IsSuccessful ? RedirectToAction(nameof(AdminIndex)) : Content(restResponse.StatusCode.ToString());
+            return restResponse.IsSuccessful ? RedirectToAction(nameof(Index)) : Content(restResponse.StatusCode.ToString());
         }
     }
 }
