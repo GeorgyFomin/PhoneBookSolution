@@ -8,21 +8,18 @@ namespace WebPhoneBook.Controllers
 {
     public class PhonesController : Controller
     {
-        static readonly string apiAddress = "https://localhost:7252/";//Или http://localhost:5252/
         private static readonly string path = "api/Phones";
 
-        readonly RestClient restClient = new(apiAddress);
         // GET: Phones
         public async Task<IActionResult> Index()
         {
             List<PhoneDto>? phoneDtos = new();
-            HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
-            HttpResponseMessage response = await client.GetAsync(path);
+            HttpResponseMessage response = await ApiClient.Http.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content.ReadAsStringAsync().Result;
                 phoneDtos = JsonConvert.DeserializeObject<List<PhoneDto>>(result);
-                ViewBag.Message = AuthenticateController.Role;
+                ViewBag.Role = AuthenticateController.Role;
             }
             return View(phoneDtos);
         }
@@ -33,8 +30,7 @@ namespace WebPhoneBook.Controllers
                 return NotFound();
             }
             PhoneDto? phoneDto = null;
-            HttpClient client = new() { BaseAddress = new Uri(apiAddress) };
-            HttpResponseMessage response = await client.GetAsync(path + $"/{id}");
+            HttpResponseMessage response = await ApiClient.Http.GetAsync(path + $"/{id}");
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content.ReadAsStringAsync().Result;
@@ -45,7 +41,7 @@ namespace WebPhoneBook.Controllers
         // GET: Phones/Details/id
         public async Task<IActionResult> Details(int? id)
         {
-            ViewBag.Message = AuthenticateController.Role;
+            ViewBag.Role = AuthenticateController.Role;
             return await GetPhoneById(id);
         }
 
@@ -69,7 +65,7 @@ namespace WebPhoneBook.Controllers
             if (AuthenticateController.JwtToken != null)
                 restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
             restRequest.AddJsonBody(phoneDto);
-            RestResponse? restResponse = await restClient.ExecutePostAsync(restRequest);
+            RestResponse? restResponse = await ApiClient.Rest.ExecutePostAsync(restRequest);
             return restResponse.IsSuccessful ? RedirectToAction(nameof(Index)) : Content(restResponse.StatusCode.ToString());
         }
         // GET: Phones/Edit/id
@@ -92,7 +88,7 @@ namespace WebPhoneBook.Controllers
                 if (AuthenticateController.JwtToken != null)
                     restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
                 restRequest.AddJsonBody(phoneDto);
-                RestResponse? restResponse = await restClient.ExecutePutAsync(restRequest);
+                RestResponse? restResponse = await ApiClient.Rest.ExecutePutAsync(restRequest);
                 if (!restResponse.IsSuccessful)
                 {
                     return Content(restResponse.StatusCode.ToString());
@@ -123,7 +119,7 @@ namespace WebPhoneBook.Controllers
             RestRequest? restRequest = new(path + $"/{id}", Method.Delete);
             if (AuthenticateController.JwtToken != null)
                 restRequest.AddHeader("Authorization", $"Bearer {AuthenticateController.JwtToken}");
-            RestResponse? restResponse = await restClient.ExecuteAsync(restRequest);
+            RestResponse? restResponse = await ApiClient.Rest.ExecuteAsync(restRequest);
             return restResponse.IsSuccessful ? RedirectToAction(nameof(Index)) : Content(restResponse.StatusCode.ToString());
         }
     }

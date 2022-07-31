@@ -26,11 +26,10 @@
     </dl>
 </div>
 <div>
-    @if (ViewBag.Message == UserRoles.Admin)
+    @if (ViewBag?.Role == UserRoles.Admin)
     {
         <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
         <text>|</text>
     }
-
     <a asp-action="Index">Back to List</a>
 </div>

@@ -17,7 +17,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
 // For Entity Framework
 builder.Services.AddDbContext<AuthDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnStr")));
-builder.Services.AddDbContext<PhonesDBContext>(opt =>opt.UseSqlServer(builder.Configuration.GetConnectionString("PhonesConnStr")));
+builder.Services.AddDbContext<PhonesDBContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("PhonesConnStr")));
 
 // For Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
@@ -71,18 +71,19 @@ builder.Services.AddSwaggerGen(c =>
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement {
     {
-            new OpenApiSecurityScheme { 
-                Reference = 
-                new OpenApiReference 
+            new OpenApiSecurityScheme {
+                Reference =
+                new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"                
-                }            
+                    Id = "Bearer"
+                }
             },
             Array.Empty<string>()
     }
     });
 });
+string? apiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?.Split(";")[0];
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())

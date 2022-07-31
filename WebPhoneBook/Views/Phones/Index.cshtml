@@ -5,29 +5,29 @@
 @{
     ViewData["Title"] = "Phone Book";
 }
-@ViewBag.Message
+@ViewBag.Role
 <h1>Phones</h1>
 
-@if (ViewBag?.Message == null)
+@if (ViewBag?.Role == null)
 {
     <text>
         Анонимный пользователь имеет право просмотра деталей каждой записи и регистрации <b>единственного</b> пользователя-администратора.<br />
     </text>
 }
 <ul>
-    @if (ViewBag?.Message == null)
+    @if (ViewBag?.Role == null)
     {
         <li>
             <a asp-action="RegisterAdmin" asp-controller="Authenticate">Регистрация пользователя-администратора</a> <br />
         </li>
     }
-    @if (ViewBag?.Message == UserRoles.Admin)
+    @if (ViewBag?.Role == UserRoles.Admin)
     {
         <li>
             <a asp-action="RegisterUser" asp-controller="Authenticate">Регистрация пользователя с правом создания новой записи</a><br />
         </li>
     }
-    @if (ViewBag?.Message != UserRoles.Admin)
+    @if (ViewBag?.Role != UserRoles.Admin)
     {
         <li>
             <a asp-action="LoginAdmin" asp-controller="Authenticate">Вход для администратора </a>
@@ -37,7 +37,7 @@
         <a asp-action="LoginUser" asp-controller="Authenticate">Вход для пользователя с правом создания новой записи</a>
     </li>
 </ul>
-@if (ViewBag?.Message == UserRoles.Admin || ViewBag?.Message == UserRoles.User)
+@if (ViewBag?.Role == UserRoles.Admin || ViewBag?.Role == UserRoles.User)
 {
     <p>
         <a asp-action="Create">Create New</a>
@@ -67,7 +67,7 @@
                 </td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                    @if (ViewBag?.Message == UserRoles.Admin)
+                    @if (ViewBag?.Role == UserRoles.Admin)
                     {
                         <text>|</text>
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
