@@ -1,0 +1,45 @@
+﻿<Window x:Name="MainWin" x:Class="WpfPhoneBook.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfPhoneBook"
+        xmlns:local1="clr-namespace:WpfPhoneBook.View"
+        xmlns:viewmodels="clr-namespace:WpfPhoneBook.ViewModels" 
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        
+d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <Grid Background="{StaticResource mainBckgr}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" FlowDirection="RightToLeft" Background="{StaticResource mainBckgr}" Height="20" >
+                <Button x:Name="User" Style="{StaticResource headerBtn}" Foreground="LightGreen" 
+                        Command="{Binding RegCommand}" CommandParameter="{Binding ElementName=User}"
+                        Content="New User" Margin="5,0" Visibility="{Binding UserBtnVisibility}"/>
+                <Button x:Name="Admin" Style="{StaticResource headerBtn}" Foreground="LightGreen" 
+                        Command="{Binding RegCommand}" CommandParameter="{Binding ElementName=Admin}" 
+                        Content="New Admin" Margin="0,0,5,0" Visibility="{Binding AdminBtnVisibility}"/>
+                <Button x:Name="UserLog" Style="{StaticResource headerBtn}" Foreground="LightGreen" 
+                        Command="{Binding LogInCommand}" CommandParameter="{Binding ElementName=User}"
+                        Content="Log User" Margin="5,0"/>
+                <Button x:Name="AdminLog" Style="{StaticResource headerBtn}" Foreground="LightGreen" 
+                        Command="{Binding LogInCommand}" CommandParameter="{Binding ElementName=Admin}" 
+                        Content="Log Admin" Margin="0,0,5,0"/>
+                <Button Style="{StaticResource headerBtn}" Foreground="LightGreen" Content="Show Phone Book" 
+                        Command="{Binding PhonesCommand}" HorizontalAlignment="Left" Visibility="{Binding AdminBtnVisibility}" />
+            </StackPanel>
+            <ContentControl Content="{Binding ViewModel}" Grid.Row="1">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type viewmodels:PhonesViewModel }">
+                        <local1:PhonesControl/>
+                    </DataTemplate>
+                </ContentControl.Resources>
+            </ContentControl>
+        </Grid>
+    </DockPanel>
+</Window>

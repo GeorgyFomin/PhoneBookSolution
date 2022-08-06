@@ -1,18 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using RestSharp;
 using UseCases.API.Authentication;
-
+using UseCases.API.Core;
 
 namespace WebPhoneBook.Controllers
 {
 
     public class AuthenticateController : Controller
     {
-        private static readonly string path = "api/Auth";
-        public static string? JwtToken { get; set; }
-        public static string? Role { get; set; }
-
         [HttpGet]
         public IActionResult RegisterUser()
         {
@@ -27,25 +22,28 @@ namespace WebPhoneBook.Controllers
                 return View();
             }
 
-            RestRequest? restRequest = new(path + "/register-user", Method.Post);
-            if (JwtToken != null)
-                restRequest.AddHeader("Authorization", $"Bearer {JwtToken}");
-            restRequest.AddJsonBody(model);
-            RestResponse? restResponse = await ApiClient.Rest.ExecutePostAsync(restRequest);
-            if (restResponse.IsSuccessful)
+            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
+            if (ApiClient.JwtToken != null)
+            {
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            }
+            HttpResponseMessage? response = await client.PostAsJsonAsync(ApiClient.authPath + "/register-user", model);
+            if (response.IsSuccessStatusCode)
+            {
                 return RedirectToAction("LoginUser", "Authenticate");
+            }
             else
             {
-                string? content = restResponse.Content;
+                HttpContent? content = response.Content;
                 if (content != null)
                 {
-                    RegisterResponse? registerResponse = JsonConvert.DeserializeObject<RegisterResponse>(content);
+                    RegisterResponse? registerResponse = JsonConvert.DeserializeObject<RegisterResponse>(await content.ReadAsStringAsync());
                     if (registerResponse != null && registerResponse.Message != null)
                     {
                         return Content(registerResponse.Message);
                     }
                 }
-                return Content(restResponse.StatusCode.ToString());
+                return Content(response.StatusCode.ToString());
             }
         }
 
@@ -63,7 +61,9 @@ namespace WebPhoneBook.Controllers
             {
                 return View();
             }
-            HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(path + "/register-admin", model);
+
+            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
+            HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/register-admin", model);
             if (response.IsSuccessStatusCode)
             {
                 return RedirectToAction("LoginAdmin", "Authenticate");
@@ -90,11 +90,13 @@ namespace WebPhoneBook.Controllers
             {
                 return View();
             }
-            HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(path + "/Login", model);
+
+            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
+            HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/Login", model);
             if (response.IsSuccessStatusCode)
             {
-                JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
-                Role = UserRoles.User;
+                ApiClient.JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
+                ApiClient.UsedRole = UserRoles.User;
                 return RedirectToAction("Index", "Phones");
             }
             return Content($"Error! User login failed! Status Code:{response.StatusCode}");
@@ -112,11 +114,13 @@ namespace WebPhoneBook.Controllers
             {
                 return View();
             }
-            HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(path + "/Login", model);
+
+            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
+            HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/Login", model);
             if (response.IsSuccessStatusCode)
             {
-                JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
-                Role = UserRoles.Admin;
+                ApiClient.JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
+                ApiClient.UsedRole = UserRoles.Admin;
                 return RedirectToAction("Index", "Phones");
             }
             return Content($"Error! Admin login failed! Status Code:{response.StatusCode}");
