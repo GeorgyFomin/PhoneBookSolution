@@ -9,6 +9,7 @@
         public static readonly string phonesPath = "api/Phones";
         public static string? UsedRole { get; set; }
         public static string? JwtToken { get; set; }
+        public static HttpClient Http { get; set; } = new HttpClient() { BaseAddress = new Uri(address) };
 
     }
 }

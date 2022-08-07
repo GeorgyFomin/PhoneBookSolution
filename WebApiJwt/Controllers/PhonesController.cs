@@ -29,7 +29,7 @@ namespace WebApiJwt.Controllers
             }
             int createdPhoneId = await _mediator.Send(new AddPhone.Command
             {
-                Name = String.IsNullOrEmpty(phoneDto.Name) ? "Noname" : phoneDto.Name,
+                Name = String.IsNullOrEmpty(phoneDto.Name) || String.IsNullOrEmpty(phoneDto.Name.Trim()) ? "Noname" : phoneDto.Name,
                 PhoneNumber = phoneDto.PhoneNumber < 10 ? 10 : phoneDto.PhoneNumber
             });
             return CreatedAtAction(nameof(GetPhone), new { id = createdPhoneId }, null);
@@ -45,7 +45,7 @@ namespace WebApiJwt.Controllers
             return Ok(await _mediator.Send(new EditPhone.Command()
             {
                 Id = phoneDto.Id,
-                Name = String.IsNullOrEmpty(phoneDto.Name) ? "Noname" : phoneDto.Name,
+                Name = String.IsNullOrEmpty(phoneDto.Name) || String.IsNullOrEmpty(phoneDto.Name.Trim()) ? "Noname" : phoneDto.Name,
                 PhoneNumber = phoneDto.PhoneNumber < 10 ? 10 : phoneDto.PhoneNumber
             }));
         }

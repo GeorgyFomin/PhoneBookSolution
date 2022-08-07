@@ -47,15 +47,14 @@ namespace WpfPhoneBook.ViewModels
                 MessageBox.Show(errMsg);
                 return;
             }
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
             HttpResponseMessage? response;
             if (role == UserRoles.User)
             {
                 if (ApiClient.JwtToken != null)
                 {
-                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                    ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
                 }
-                response = await client.PostAsJsonAsync(ApiClient.authPath + "/register-user",
+                response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/register-user",
                     new RegisterModel() { Email = regLogWin.Email.Text, Password = regLogWin.Password.Password, Username = regLogWin.UserName.Text });
                 if (!response.IsSuccessStatusCode)
                 {
@@ -74,7 +73,7 @@ namespace WpfPhoneBook.ViewModels
             }
             else
             {
-                response = await client.PostAsJsonAsync(ApiClient.authPath + "/register-admin",
+                response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/register-admin",
                     new RegisterModel() { Email = regLogWin.Email.Text, Password = regLogWin.Password.Password, Username = regLogWin.UserName.Text });
                 if (!response.IsSuccessStatusCode)
                 {
@@ -105,8 +104,7 @@ namespace WpfPhoneBook.ViewModels
             string errMsg = $"Error! {role} login failed!";
             if (res.HasValue && res.Value)
             {
-                HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
-                HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/Login",
+                HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/Login",
                     new LoginModel() { Password = regLogWin.Password.Password, Username = regLogWin.UserName.Text });
                 if (response.IsSuccessStatusCode)
                 {

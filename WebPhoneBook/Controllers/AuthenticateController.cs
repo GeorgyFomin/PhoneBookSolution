@@ -22,12 +22,11 @@ namespace WebPhoneBook.Controllers
                 return View();
             }
 
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
             if (ApiClient.JwtToken != null)
             {
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
             }
-            HttpResponseMessage? response = await client.PostAsJsonAsync(ApiClient.authPath + "/register-user", model);
+            HttpResponseMessage? response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/register-user", model);
             if (response.IsSuccessStatusCode)
             {
                 return RedirectToAction("LoginUser", "Authenticate");
@@ -62,8 +61,7 @@ namespace WebPhoneBook.Controllers
                 return View();
             }
 
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
-            HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/register-admin", model);
+            HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/register-admin", model);
             if (response.IsSuccessStatusCode)
             {
                 return RedirectToAction("LoginAdmin", "Authenticate");
@@ -91,8 +89,7 @@ namespace WebPhoneBook.Controllers
                 return View();
             }
 
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
-            HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/Login", model);
+            HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/Login", model);
             if (response.IsSuccessStatusCode)
             {
                 ApiClient.JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;
@@ -115,8 +112,7 @@ namespace WebPhoneBook.Controllers
                 return View();
             }
 
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
-            HttpResponseMessage response = await client.PostAsJsonAsync(ApiClient.authPath + "/Login", model);
+            HttpResponseMessage response = await ApiClient.Http.PostAsJsonAsync(ApiClient.authPath + "/Login", model);
             if (response.IsSuccessStatusCode)
             {
                 ApiClient.JwtToken = JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync())?.Token;

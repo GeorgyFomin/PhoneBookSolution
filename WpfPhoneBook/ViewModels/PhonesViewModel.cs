@@ -10,6 +10,7 @@ using System.Windows.Input;
 using UseCases.API.Authentication;
 using UseCases.API.Core;
 using UseCases.API.Dto;
+using WebApiJwt.Data;
 using WpfPhoneBook.Commands;
 
 namespace WpfPhoneBook.ViewModels
@@ -54,9 +55,8 @@ namespace WpfPhoneBook.ViewModels
         public async void ResetPhones()
         {
             // Получаем из базы список заказов или null.
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
             // Посылаем клиенту запрос о заказах.
-            HttpResponseMessage response = await client.GetAsync(ApiClient.phonesPath);
+            HttpResponseMessage response = await ApiClient.Http.GetAsync(ApiClient.phonesPath);
             //Возвращаем полученый из базы данных список заказов либо null.
             List<PhoneDto>? phonesDto = response.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<PhoneDto>>(response.Content.ReadAsStringAsync().Result) : null;
             // Создаем коллекцию заказов, если список существует.
@@ -66,10 +66,10 @@ namespace WpfPhoneBook.ViewModels
         {
             if (selectedPhone == null)
                 return;
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
+            //Здесь клиент ApiClient.Http описан в отдельном классе и в отдельной библиотеке. Проблем нет.
             if (ApiClient.JwtToken != null)
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-            HttpResponseMessage? response = await client.DeleteAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}");
+                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            HttpResponseMessage? response = await ApiClient.Http.DeleteAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}");
             if (response.IsSuccessStatusCode)
                 Phones.Remove(selectedPhone);
             else
@@ -86,8 +86,10 @@ namespace WpfPhoneBook.ViewModels
         {
             if (selectedPhone == null)
                 return;
-            HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
             HttpResponseMessage? response;
+            // Здесь требуется локальное описание клиента. 
+            // Если использовать клиента ApiClient.Http, описанного во внешнем классе, ни редактирование ни создание новой записи работать не будут.
+            HttpClient client = new() { BaseAddress = new Uri(ApiClient.address) };
             if (ApiClient.JwtToken != null)
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
             response = selectedPhone.Id == 0 ? await client.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
