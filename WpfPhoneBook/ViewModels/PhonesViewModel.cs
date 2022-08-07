@@ -1,20 +1,15 @@
 ﻿using Newtonsoft.Json;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UseCases.API.Authentication;
 using UseCases.API.Core;
 using UseCases.API.Dto;
-using WebApiJwt.Data;
 using WpfPhoneBook.Commands;
 
 namespace WpfPhoneBook.ViewModels
@@ -43,42 +38,34 @@ namespace WpfPhoneBook.ViewModels
         public bool CanRemove { get => canRemove; set { canRemove = value; RaisePropertyChanged(nameof(CanRemove)); } }
         public bool IsReadOnly { get => isReadOnly; set { isReadOnly = value; RaisePropertyChanged(nameof(IsReadOnly)); } }
         /// <summary>
-        /// Устанавливает и возвращает коллекцию заказов.
+        /// Устанавливает и возвращает коллекцию объектов модели.
         /// </summary>
         public ObservableCollection<PhoneDto> Phones { get => phones; set { phones = value; RaisePropertyChanged(nameof(Phones)); } }
-
         public ICommand PhoneRemoveCommand => phoneRemoveCommand ??= new RelayCommand(PhoneRemove);
         public ICommand PhoneSelectionCommand => phoneSelectionCommand ??= new RelayCommand(PhoneSelection);
         public ICommand PhoneRowEditEndCommand => phoneRowEditEndCommand ??= new RelayCommand(PhoneRowEditEnd);
+        public ICommand PhoneBeginningEditCommand => phoneBeginningEditCommand ??= new RelayCommand(PhoneBeginningEdit);
         #endregion
+        #region Methods
         public PhonesViewModel()
         {
             ResetPhones();
         }
-        static async Task<List<PhoneDto>?> GetPhones()
+        public async void ResetPhones()
         {
+            // Получаем из базы список заказов или null.
             HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
             // Посылаем клиенту запрос о заказах.
             HttpResponseMessage response = await client.GetAsync(ApiClient.phonesPath);
             //Возвращаем полученый из базы данных список заказов либо null.
-            return response.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<PhoneDto>>(response.Content.ReadAsStringAsync().Result) : null;
-        }
-        public async void ResetPhones()
-        {
-            // Получаем из базы список заказов или null.
-            List<PhoneDto>? phonesDto = await GetPhones();
+            List<PhoneDto>? phonesDto = response.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<PhoneDto>>(response.Content.ReadAsStringAsync().Result) : null;
             // Создаем коллекцию заказов, если список существует.
             Phones = phonesDto != null ? new ObservableCollection<PhoneDto>(phonesDto) : new();
         }
-
-        #region Methods
         private async void PhoneRemove(object? e)
         {
             if (selectedPhone == null)
-            {
                 return;
-            }
-
             HttpClient? client = new() { BaseAddress = new Uri(ApiClient.address) };
             if (ApiClient.JwtToken != null)
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
@@ -110,7 +97,6 @@ namespace WpfPhoneBook.ViewModels
             else
                 MessageBox.Show(response.StatusCode.ToString());
         }
-        public RelayCommand PhoneBeginningEditCommand => phoneBeginningEditCommand ??= new RelayCommand(PhoneBeginningEdit);
         private void PhoneBeginningEdit(object? e)
         {
             if (e == null || e is not DataGridBeginningEditEventArgs eventArgs)

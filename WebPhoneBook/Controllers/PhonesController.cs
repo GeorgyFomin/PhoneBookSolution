@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using RestSharp;
 using UseCases.API.Core;
 using UseCases.API.Dto;
-using WebApiJwt.Data;
 
 namespace WebPhoneBook.Controllers
 {
