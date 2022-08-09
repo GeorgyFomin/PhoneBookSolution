@@ -19,7 +19,7 @@
                   RowHeaderStyle="{StaticResource BlackNavy}" Grid.Row="1" x:Name="phonesGridView" 
                   DataContext="{Binding Mode=OneWay}" ItemsSource="{Binding Phones}" 
                   AutoGenerateColumns="False" Style="{StaticResource BlackNavy}" RowStyle="{StaticResource RowStyle}" 
-                  CellStyle="{StaticResource CellStyle}" 
+                  CellStyle="{StaticResource CellStyle}" SelectedItem="{Binding SelectedPhone}"
                   ColumnHeaderStyle="{StaticResource ResourceKey=BlackNavy}" CanUserAddRows="{Binding CanAdd}" 
                   CanUserDeleteRows="{Binding CanRemove}">
             <DataGrid.Columns>
@@ -28,17 +28,14 @@
                 <DataGridTextColumn Header=" Phone Number  " Binding="{Binding PhoneNumber}" EditingElementStyle="{StaticResource EditingCellTextBox}"/>
             </DataGrid.Columns>
             <DataGrid.InputBindings>
-                <KeyBinding Key="Delete" Command="{Binding PhoneRemoveCommand}" CommandParameter="{Binding ElementName=phonesGridView}"/>
+                <KeyBinding Key="Delete" Command="{Binding PhoneRemoveCommand}"/>
             </DataGrid.InputBindings>
             <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding PhoneSelectionCommand }" CommandParameter="{Binding ElementName=phonesGridView}"/>
-                </i:EventTrigger>
                 <i:EventTrigger EventName="BeginningEdit">
                     <i:InvokeCommandAction Command="{Binding PhoneBeginningEditCommand}" PassEventArgsToCommand="True"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="RowEditEnding">
-                    <i:InvokeCommandAction Command="{Binding PhoneRowEditEndCommand}" CommandParameter="{Binding ElementName=phonesGridView}"/>
+                    <i:InvokeCommandAction Command="{Binding PhoneRowEditEndCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DataGrid>

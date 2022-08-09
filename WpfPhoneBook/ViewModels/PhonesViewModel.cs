@@ -27,7 +27,6 @@ namespace WpfPhoneBook.ViewModels
         /// </summary>
         private PhoneDto? selectedPhone;
         private RelayCommand? phoneRemoveCommand;
-        private RelayCommand? phoneSelectionCommand;
         private RelayCommand? phoneRowEditEndCommand;
         private RelayCommand? phoneBeginningEditCommand;
         private bool canAdd;
@@ -35,6 +34,7 @@ namespace WpfPhoneBook.ViewModels
         private bool isReadOnly = true;
         #endregion
         #region Properties
+        public PhoneDto? SelectedPhone { get => selectedPhone; set { selectedPhone = value; RaisePropertyChanged(nameof(SelectedPhone)); } }
         public bool CanAdd { get => canAdd; set { canAdd = value; RaisePropertyChanged(nameof(CanAdd)); } }
         public bool CanRemove { get => canRemove; set { canRemove = value; RaisePropertyChanged(nameof(CanRemove)); } }
         public bool IsReadOnly { get => isReadOnly; set { isReadOnly = value; RaisePropertyChanged(nameof(IsReadOnly)); } }
@@ -43,7 +43,6 @@ namespace WpfPhoneBook.ViewModels
         /// </summary>
         public ObservableCollection<PhoneDto> Phones { get => phones; set { phones = value; RaisePropertyChanged(nameof(Phones)); } }
         public ICommand PhoneRemoveCommand => phoneRemoveCommand ??= new RelayCommand(PhoneRemove);
-        public ICommand PhoneSelectionCommand => phoneSelectionCommand ??= new RelayCommand(PhoneSelection);
         public ICommand PhoneRowEditEndCommand => phoneRowEditEndCommand ??= new RelayCommand(PhoneRowEditEnd);
         public ICommand PhoneBeginningEditCommand => phoneBeginningEditCommand ??= new RelayCommand(PhoneBeginningEdit);
         #endregion
@@ -54,12 +53,11 @@ namespace WpfPhoneBook.ViewModels
         }
         public async void ResetPhones()
         {
-            // Получаем из базы список заказов или null.
-            // Посылаем клиенту запрос о заказах.
+            // Посылаем клиенту запрос о т. книге.
             HttpResponseMessage response = await ApiClient.Http.GetAsync(ApiClient.phonesPath);
-            //Возвращаем полученый из базы данных список заказов либо null.
+            //Возвращаем полученый из базы данных т. книгу либо null.
             List<PhoneDto>? phonesDto = response.IsSuccessStatusCode ? JsonConvert.DeserializeObject<List<PhoneDto>>(response.Content.ReadAsStringAsync().Result) : null;
-            // Создаем коллекцию заказов, если список существует.
+            // Создаем коллекцию записей, если т. книга существует.
             Phones = phonesDto != null ? new ObservableCollection<PhoneDto>(phonesDto) : new();
         }
         private async void PhoneRemove(object? e)
@@ -76,33 +74,31 @@ namespace WpfPhoneBook.ViewModels
             if (ApiClient.UsedRole == UserRoles.User)
                 MessageBox.Show(response.StatusCode.ToString() + $". У роли {UserRoles.User} нет прав на удаление записи!");
         }
-        private void PhoneSelection(object? e)
-        {
-            if (e == null || e is not DataGrid grid || grid.SelectedItem == null)
-                return;
-            selectedPhone = grid.SelectedItem is PhoneDto phoneDto ? phoneDto : null;
-        }
         private async void PhoneRowEditEnd(object? e)
         {
             if (selectedPhone == null)
                 return;
-            HttpResponseMessage? response;
             // Здесь требуется локальное описание клиента. 
-            // Если использовать клиента ApiClient.Http, описанного во внешнем классе, ни редактирование ни создание новой записи работать не будут.
+            // Если использовать клиента ApiClient.Http, описанного во внешнем классе, ни редактирование, ни создание новой записи работать не будут.
             HttpClient client = new() { BaseAddress = new Uri(ApiClient.address) };
-            if (ApiClient.JwtToken != null)
+            if (ApiClient.JwtToken != null)// Если токен есть
+                // Формируем заголовк запроса, подключая имеющийся токен.
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-            response = selectedPhone.Id == 0 ? await client.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
+            // Формируем запрос на редактирование или создания записи.
+            HttpResponseMessage? response = selectedPhone.Id == 0 ? await client.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
                 await client.PutAsJsonAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}", selectedPhone);
             if (response.IsSuccessStatusCode)
+                // При удачном запросе обновляем т. книгу в UI.
                 ResetPhones();
             else
+                // Формируем сообщение при неудачном результате запроса.
                 MessageBox.Show(response.StatusCode.ToString());
         }
         private void PhoneBeginningEdit(object? e)
         {
             if (e == null || e is not DataGridBeginningEditEventArgs eventArgs)
                 return;
+            // Роль UserRoles.User имеет право только добавлять запись в телю книгу, но не редактировать уже имеющиеся записи.
             eventArgs.Cancel = ApiClient.UsedRole == UserRoles.User && selectedPhone != null && selectedPhone.Id != 0;
         }
         #endregion
