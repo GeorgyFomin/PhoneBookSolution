@@ -8,11 +8,19 @@ namespace WebPhoneBook.Controllers
 {
     public class PhonesController : Controller
     {
+        private readonly HttpClient httpClient = ApiClient.Http;
+        //private readonly IHttpClientFactory _httpClientFactory;
+        //public PhonesController(IHttpClientFactory httpClientFactory)
+        //{
+        //    _httpClientFactory = httpClientFactory;
+        //    httpClient = _httpClientFactory.CreateClient("ApiClient");
+        //}
         // GET: Phones
         public async Task<IActionResult> Index()
         {
             List<PhoneDto>? phoneDtos = new();
-            HttpResponseMessage response = await ApiClient.Http.GetAsync(ApiClient.phonesPath);
+            HttpResponseMessage response =
+            await ApiClient.Http.GetAsync(ApiClient.phonesPath);
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content.ReadAsStringAsync().Result;
@@ -29,7 +37,8 @@ namespace WebPhoneBook.Controllers
             }
             PhoneDto? phoneDto = null;
 
-            HttpResponseMessage response = await ApiClient.Http.GetAsync(ApiClient.phonesPath + $"/{id}");
+            HttpResponseMessage response =
+            await httpClient.GetAsync(ApiClient.phonesPath + $"/{id}");
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content.ReadAsStringAsync().Result;
@@ -63,9 +72,10 @@ namespace WebPhoneBook.Controllers
 
             if (ApiClient.JwtToken != null)
             {
-                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
             }
-            HttpResponseMessage? response = await ApiClient.Http.PostAsJsonAsync(ApiClient.phonesPath, phoneDto);
+            HttpResponseMessage? response =
+            await httpClient.PostAsJsonAsync(ApiClient.phonesPath, phoneDto);
             return response.IsSuccessStatusCode ? RedirectToAction(nameof(Index)) : Content(response.StatusCode.ToString());
         }
         // GET: Phones/Edit/id
@@ -86,9 +96,10 @@ namespace WebPhoneBook.Controllers
             {
                 if (ApiClient.JwtToken != null)
                 {
-                    ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
                 }
-                HttpResponseMessage? response = await ApiClient.Http.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
+                HttpResponseMessage? response =
+                await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
                 if (!response.IsSuccessStatusCode)
                     return Content(response.StatusCode.ToString());
             }
@@ -116,9 +127,10 @@ namespace WebPhoneBook.Controllers
         {
             if (ApiClient.JwtToken != null)
             {
-                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
             }
-            HttpResponseMessage? response = await ApiClient.Http.DeleteAsync(ApiClient.phonesPath + $"/{id}");
+            HttpResponseMessage? response =
+            await httpClient.DeleteAsync(ApiClient.phonesPath + $"/{id}");
             return response.IsSuccessStatusCode ? RedirectToAction(nameof(Index)) : Content(response.StatusCode.ToString());
         }
     }

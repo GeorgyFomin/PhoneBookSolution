@@ -10,7 +10,6 @@ using System.Windows.Input;
 using UseCases.API.Authentication;
 using UseCases.API.Core;
 using UseCases.API.Dto;
-using WebApiJwt.Data;
 using WpfPhoneBook.Commands;
 
 namespace WpfPhoneBook.ViewModels
@@ -78,15 +77,16 @@ namespace WpfPhoneBook.ViewModels
         {
             if (selectedPhone == null)
                 return;
-            // Здесь требуется локальное описание клиента. 
-            // Если использовать клиента ApiClient.Http, описанного во внешнем классе, ни редактирование, ни создание новой записи работать не будут.
-            HttpClient client = new() { BaseAddress = new Uri(ApiClient.address) };
+            // Здесь требуется создание локального клиента. 
+            // Если использовать клиента Http, созданного вне метода, ни редактирование, ни создание новой записи работать не будут.
+            // Отредактированная версия записи не будет поступать по адресу. Будет поступать прежняя версия.
+            using HttpClient httpClient = new() { BaseAddress = new Uri(ApiClient.address) };
             if (ApiClient.JwtToken != null)// Если токен есть
-                // Формируем заголовк запроса, подключая имеющийся токен.
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                // Формируем заголовок запроса, подключая имеющийся токен.
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
             // Формируем запрос на редактирование или создания записи.
-            HttpResponseMessage? response = selectedPhone.Id == 0 ? await client.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
-                await client.PutAsJsonAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}", selectedPhone);
+            HttpResponseMessage? response = selectedPhone.Id == 0 ? await httpClient.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
+                await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}", selectedPhone);
             if (response.IsSuccessStatusCode)
                 // При удачном запросе обновляем т. книгу в UI.
                 ResetPhones();

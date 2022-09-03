@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using WpfPhoneBook.Commands;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -92,9 +91,7 @@ namespace WpfPhoneBook.ViewModels
         private async void LogIn(object? e)
         {
             if (e == null || e is not Button regButton || regButton == null)
-            {
                 return;
-            }
             RegLogWindow regLogWin = new() { DataContext = this };
             regLogWin.RegBtn.Content = "Войти";
             regLogWin.Email.Visibility = Visibility.Collapsed;

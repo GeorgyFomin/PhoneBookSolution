@@ -1,4 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Net.Http;
+
+using UseCases.API.Core;
+
 namespace WpfPhoneBook.ViewModels
 {
     public class ViewModelBase : INotifyPropertyChanged
