@@ -28,6 +28,7 @@ namespace WpfPhoneBook.ViewModels
         private RelayCommand? phoneRemoveCommand;
         private RelayCommand? phoneRowEditEndCommand;
         private RelayCommand? phoneBeginningEditCommand;
+        private RelayCommand? resetCommand;
         private bool canAdd;
         private bool canRemove;
         private bool isReadOnly = true;
@@ -44,12 +45,10 @@ namespace WpfPhoneBook.ViewModels
         public ICommand PhoneRemoveCommand => phoneRemoveCommand ??= new RelayCommand(PhoneRemove);
         public ICommand PhoneRowEditEndCommand => phoneRowEditEndCommand ??= new RelayCommand(PhoneRowEditEnd);
         public ICommand PhoneBeginningEditCommand => phoneBeginningEditCommand ??= new RelayCommand(PhoneBeginningEdit);
+        public ICommand ResetCommand => resetCommand ??= new RelayCommand(Reset);
         #endregion
         #region Methods
-        public PhonesViewModel()
-        {
-            ResetPhones();
-        }
+        public PhonesViewModel() => ResetPhones();
         public async void ResetPhones()
         {
             // Посылаем клиенту запрос о т. книге.
@@ -73,6 +72,7 @@ namespace WpfPhoneBook.ViewModels
             if (ApiClient.UsedRole == UserRoles.User)
                 MessageBox.Show(response.StatusCode.ToString() + $". У роли {UserRoles.User} нет прав на удаление записи!");
         }
+
         private async void PhoneRowEditEnd(object? e)
         {
             if (selectedPhone == null)
@@ -80,15 +80,18 @@ namespace WpfPhoneBook.ViewModels
             // Здесь требуется создание локального клиента. 
             // Если использовать клиента Http, созданного вне метода, ни редактирование, ни создание новой записи работать не будут.
             // Отредактированная версия записи не будет поступать по адресу. Будет поступать прежняя версия.
-            using HttpClient httpClient = new() { BaseAddress = new Uri(ApiClient.address) };
+            //using HttpClient httpClient = new() { BaseAddress = new Uri(ApiClient.address) };
             if (ApiClient.JwtToken != null)// Если токен есть
-                // Формируем заголовок запроса, подключая имеющийся токен.
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-            // Формируем запрос на редактирование или создания записи.
-            HttpResponseMessage? response = selectedPhone.Id == 0 ? await httpClient.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
-                await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}", selectedPhone);
+                                           // Формируем заголовок запроса, подключая имеющийся токен.
+                                           //httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            // Формируем запрос на редактирование или создание записи.
+            //HttpResponseMessage response = selectedPhone.Id == 0 ? await httpClient.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
+            //    await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}", selectedPhone);
+            HttpResponseMessage response = selectedPhone.Id == 0 ? await ApiClient.Http.PostAsJsonAsync(ApiClient.phonesPath, selectedPhone) :
+                await ApiClient.Http.PutAsJsonAsync(ApiClient.phonesPath + $"/{selectedPhone.Id}", selectedPhone);
             if (response.IsSuccessStatusCode)
-                // При удачном запросе обновляем т. книгу в UI.
+                // При удачном запросе обновляем тел. книгу в UI.
                 ResetPhones();
             else
                 // Формируем сообщение при неудачном результате запроса.
@@ -101,6 +104,9 @@ namespace WpfPhoneBook.ViewModels
             // Роль UserRoles.User имеет право только добавлять запись в телю книгу, но не редактировать уже имеющиеся записи.
             eventArgs.Cancel = ApiClient.UsedRole == UserRoles.User && selectedPhone != null && selectedPhone.Id != 0;
         }
+
+
+        private void Reset(object? commandParameter)=>ResetPhones();
         #endregion
     }
 }

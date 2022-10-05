@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Net.Http;
 using UseCases.API.Core;
 using UseCases.API.Dto;
 
@@ -8,7 +9,7 @@ namespace WebPhoneBook.Controllers
 {
     public class PhonesController : Controller
     {
-        private readonly HttpClient httpClient = ApiClient.Http;
+        //private readonly HttpClient httpClient = ApiClient.Http;
         //private readonly IHttpClientFactory _httpClientFactory;
         //public PhonesController(IHttpClientFactory httpClientFactory)
         //{
@@ -38,7 +39,8 @@ namespace WebPhoneBook.Controllers
             PhoneDto? phoneDto = null;
 
             HttpResponseMessage response =
-            await httpClient.GetAsync(ApiClient.phonesPath + $"/{id}");
+            //await httpClient.GetAsync(ApiClient.phonesPath + $"/{id}");
+            await ApiClient.Http.GetAsync(ApiClient.phonesPath + $"/{id}");
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content.ReadAsStringAsync().Result;
@@ -70,12 +72,12 @@ namespace WebPhoneBook.Controllers
                 return View(phoneDto);
             }
 
+            //if (ApiClient.JwtToken != null)
+            //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            //HttpResponseMessage? response = await httpClient.PostAsJsonAsync(ApiClient.phonesPath, phoneDto);
             if (ApiClient.JwtToken != null)
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-            }
-            HttpResponseMessage? response =
-            await httpClient.PostAsJsonAsync(ApiClient.phonesPath, phoneDto);
+                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            HttpResponseMessage? response = await ApiClient.Http.PostAsJsonAsync(ApiClient.phonesPath, phoneDto);
             return response.IsSuccessStatusCode ? RedirectToAction(nameof(Index)) : Content(response.StatusCode.ToString());
         }
         // GET: Phones/Edit/id
@@ -94,12 +96,12 @@ namespace WebPhoneBook.Controllers
             }
             try
             {
+                //if (ApiClient.JwtToken != null)
+                //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                //HttpResponseMessage? response = await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
                 if (ApiClient.JwtToken != null)
-                {
-                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-                }
-                HttpResponseMessage? response =
-                await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
+                    ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+                HttpResponseMessage? response = await ApiClient.Http.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
                 if (!response.IsSuccessStatusCode)
                     return Content(response.StatusCode.ToString());
             }
@@ -125,12 +127,12 @@ namespace WebPhoneBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            //if (ApiClient.JwtToken != null)
+            //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            //HttpResponseMessage? response = await httpClient.DeleteAsync(ApiClient.phonesPath + $"/{id}");
             if (ApiClient.JwtToken != null)
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-            }
-            HttpResponseMessage? response =
-            await httpClient.DeleteAsync(ApiClient.phonesPath + $"/{id}");
+                ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
+            HttpResponseMessage? response = await ApiClient.Http.DeleteAsync(ApiClient.phonesPath + $"/{id}");
             return response.IsSuccessStatusCode ? RedirectToAction(nameof(Index)) : Content(response.StatusCode.ToString());
         }
     }
