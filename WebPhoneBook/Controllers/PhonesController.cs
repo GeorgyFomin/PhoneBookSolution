@@ -96,9 +96,6 @@ namespace WebPhoneBook.Controllers
             }
             try
             {
-                //if (ApiClient.JwtToken != null)
-                //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
-                //HttpResponseMessage? response = await httpClient.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
                 if (ApiClient.JwtToken != null)
                     ApiClient.Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", ApiClient.JwtToken);
                 HttpResponseMessage? response = await ApiClient.Http.PutAsJsonAsync(ApiClient.phonesPath + $"/{phoneDto.Id}", phoneDto);
